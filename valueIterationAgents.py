@@ -68,14 +68,14 @@ class ValueIterationAgent(ValueEstimationAgent):
         for i in range(0,self.iterations): 
             
             for s in self.mdp.getStates():
-                maxValue = float("-inf")
+                max = float("-inf")
 
                 for a in self.mdp.getPossibleActions(s):
 
                     qValue = self.computeQValueFromValues(s,a)
 
-                    if (qValue >= maxValue):
-                        maxValue = qValue
+                    if (qValue >= max):
+                        max = qValue
                         values[s] = qValue
 
             #update values
@@ -117,13 +117,12 @@ class ValueIterationAgent(ValueEstimationAgent):
         
         #check if state = terminal
         if self.mdp.isTerminal(state):
-            return None
+            return 
         
         else:
             actionDict = util.Counter()
-            actions = self.mdp.getPossibleActions(state)
 
-            for a in actions:
+            for a in self.mdp.getPossibleActions(state):
                 actionDict[a] = self.computeQValueFromValues(state,a)
 
             return actionDict.argMax()    
@@ -168,14 +167,12 @@ class AsynchronousValueIterationAgent(ValueIterationAgent):
     def runValueIteration(self):
         "*** YOUR CODE HERE ***"
         states = self.mdp.getStates()
-        statesNum = len(states)
 
         for i in range(0,self.iterations): 
-            s = states[i % statesNum]
+            s = states[i % len(states)]
 
             if not self.mdp.isTerminal(s):
-                a = self.getAction(s)
-                self.values[s] = self.computeQValueFromValues(s,a)
+                self.values[s] = self.computeQValueFromValues(s,self.getAction(s))
 
 
 class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
@@ -206,6 +203,7 @@ class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
             if not self.mdp.isTerminal(s):
                 for a in self.mdp.getPossibleActions(s):
                     for (successor, p) in self.mdp.getTransitionStatesAndProbs(s, a):
+                        
                         if successor in predecessors:
                             predecessors[successor].add(s)
                         else:
